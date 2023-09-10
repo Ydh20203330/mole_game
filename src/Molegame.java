@@ -37,20 +37,19 @@ public class Molegame extends JFrame{
         setResizable(false); // 창 크기 변경 불가
         setLocationRelativeTo(null); // 창 중앙에 위치
 
-        ImageIcon backicon = new ImageIcon("Molegamebackground.png");
+        ImageIcon backgroundicon = new ImageIcon("Molegamebackground.png");
+        backgroundImg = backgroundicon.getImage();
 
         setVisible(true);
-
     }
 
     public void paint(Graphics g){
         super.paint(g);
         if (backgroundImg != null) {
-
+            g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this);
         }
     }
     public static void main(String[] args) {
-
         Molegame m = new Molegame();
 
     }
