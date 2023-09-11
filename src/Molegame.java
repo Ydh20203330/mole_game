@@ -153,7 +153,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         private Timer moleTimer;
         private int delay;
 
-        public Mole() {
+        public Mole() { // Mole 클래스 생성자, 좌표값과 delay 설정 후 Timer 설정
             x = -100; y = - 100; delay = 2500;
             moleTimer = new Timer(delay, new ActionListener() {
                 @Override
