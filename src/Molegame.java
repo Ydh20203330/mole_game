@@ -14,6 +14,8 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
     private int molegame_score; // 점수
     private JLabel score_label; // 점수 표시할 칸
 
+    private List<Mole> moles; // 두더지 클래스 리스트
+
     class HammerThread extends Thread {
         public void run() {
             while(true){
@@ -31,6 +33,11 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         pressedKeys = new HashSet<>();
         setTitle("Mole Game - 20203330 YDH"); // 20203330 윤대현의 두더지 게임을 타이틀에
         setSize(800,400); // 창 크기 조절
+
+        moles = new ArrayList<>();
+        for (int i=0; i<3; i++){
+            moles.add(new Mole());
+        } // 두더지 인스턴스 배열에 추가
 
         score_label = new JLabel(); // 점수 기록용 label 생성
         score_label.setText("" + molegame_score); // 텍스트 설정
@@ -141,6 +148,16 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
                 hammerX -= 20;
             }
         }
+    }
+
+    class Mole { // 한마리의 두더지가 아닌 여러 마리의 두더지를 다루기 위한 Mole 클래스
+        private int x, y;
+        public Mole() { x = -100; y = - 100; }
+        public int getX() { return x; }
+        public int getY() { return y; }
+        public void setX(int x) { this.x = x; }
+        public void setY(int y) { this.y = y; }
+        public void reset() { x = -100; y = -100;}
     }
 
 
