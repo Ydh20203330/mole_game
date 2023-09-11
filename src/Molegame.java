@@ -6,12 +6,13 @@ import java.util.HashSet;
 public class Molegame extends JFrame implements KeyListener { // JFrame, KeyListener 사용
     private Image backgroundImg; // 배경 이미지
     private Image hammerImg; // 해머 이미지
-    private Image moleImg;
+    private Image moleImg; // 두더지 이미지
     private int hammerX , hammerY; // 해머 좌표
     private int moleX, moleY; // 두더지 좌표
     private Timer moleTimer; // 두더지를 일정 시간마다 움직이게 하기 위한 Timer
     private HashSet<Integer> pressedKeys; // 눌린 키를 다루기 위한 해시셋
     private int molegame_score; // 점수
+    private JLabel score_label; // 점수 표시할 칸
 
     class HammerThread extends Thread {
         public void run() {
@@ -31,6 +32,14 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         setTitle("Mole Game - 20203330 YDH"); // 20203330 윤대현의 두더지 게임을 타이틀에
         setSize(800,400); // 창 크기 조절
 
+        score_label = new JLabel(); // 점수 기록용 label 생성
+        score_label.setText("" + molegame_score); // 텍스트 설정
+        Font score_font = new Font("궁서", Font.BoLD, 50); // 폰트 설정
+        score_label.setFont(score_font); // 폰트 적용
+
+        score_label.setBounds(20, 20, 200, 50); // 점수판 띄움
+        add(score_label);
+
         moleX = -100; moleY = -100;
 
         moleTimer = new Timer(3000, new ActionListener() {
@@ -40,16 +49,16 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
                 moleY = (int)(Math.random() * (getHeight() - 50));
                 repaint();
             }
-        });
-        moleTimer.start();
+        }); // 두더지가 타이머에 따라 랜덤한 위치로 이동함
+        moleTimer.start(); // 타이머 시작
 
         ImageIcon backgroundicon = new ImageIcon("Molegamebackground.png"); // 배경 이미지 imageicon으로 획득
         backgroundImg = backgroundicon.getImage(); // 배경 이미지 저장
 
-        ImageIcon hammericon = new ImageIcon("hammer.png");
+        ImageIcon hammericon = new ImageIcon("hammer.png"); // 망치 이미지
         hammerImg = hammericon.getImage();
 
-        ImageIcon moleicon = new ImageIcon("molerat.png");
+        ImageIcon moleicon = new ImageIcon("molerat.png"); // 두더지 이미지
         moleImg = moleicon.getImage();
 
         setResizable(false); // 창 크기 변경 불가
@@ -62,10 +71,10 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         requestFocus();
     }
 
-    private void resetMole() {
+    private void resetMole() { // 두더지를 망치로 때렸을 때 위치 변경과 타이머 초기화
         moleX = (int)(Math.random() * (getWidth() - 50));
         moleY = (int)(Math.random() * (getHeight() - 50));
-        moleTimer.restart();
+        moleTimer.restart(); // 타이머 초기화
     }
 
     public void paint(Graphics g){ // 배경은 유지, 해머와 두더지만 계속 갱신
@@ -82,15 +91,16 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
 
     @Override
     public void keyPressed(KeyEvent e) { // 키 누름처리, 해시셋에 키 코드가 저장됨
-        int keyCode = e.getKeyCode();
-        pressedKeys.add(keyCode);
+        int keyCode = e.getKeyCode(); // 키코드 받아오기
+        pressedKeys.add(keyCode); // 해시셋에 누른 키 포함시킴
 
-        if (keyCode == KeyEvent.VK_SPACE){
-            if((hammerX <= moleX + 50) && (hammerX >= moleX - 50)
+        if (keyCode == KeyEvent.VK_SPACE){ // 스페이스를 눌렀을 경우
+            if((hammerX <= moleX + 50) && (hammerX >= moleX - 50) // 두더지 이미지의 좌표범위와 일치하는 경우
                     && (hammerY <= moleY + 50) && (hammerY <= moleY + 50)){
-                molegame_score ++;
-                System.out.println("Score : " + molegame_score);
-                resetMole();
+                molegame_score ++; // 점수 획득
+                System.out.println("Score : " + molegame_score); // 임시 점수출력
+                score_label.setText("" + molegame_score); // 점수 우측 상단에 호출용
+                resetMole(); // 두더지 초기화
             }
         }
 
