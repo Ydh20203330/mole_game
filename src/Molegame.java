@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class Molegame extends JFrame implements KeyListener { // JFrame, KeyListener 사용
     private Image backgroundImg; // 배경 이미지
-    private Image hammerImg; // 해머 이미지
+    private Image hammerImg, hitImg; // 해머 이미지
     private Image moleImg; // 두더지 이미지
     private HashSet<Integer> pressedKeys; // 눌린 키를 다루기 위한 해시셋
     private int molegame_score1, molegame_score2; // 점수 1P, 2P
@@ -33,12 +33,14 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
 
         ImageIcon hammericon = new ImageIcon("hammer.png"); // 망치 이미지
         hammerImg = hammericon.getImage();
+        ImageIcon hithammericon = new ImageIcon("hammer_hit.png"); // 망치 타격 이미지
+        hitImg = hithammericon.getImage();
 
         ImageIcon moleicon = new ImageIcon("molerat.png"); // 두더지 이미지
         moleImg = moleicon.getImage();
-        hammer1 = new Hammer(100, 100, hammerImg, KeyEvent.VK_W, KeyEvent.VK_S,
+        hammer1 = new Hammer(100, 100, hammerImg, hitImg, KeyEvent.VK_W, KeyEvent.VK_S,
                 KeyEvent.VK_A, KeyEvent.VK_D); // 플레이어 1 해머 설정
-        hammer2 = new Hammer(600, 100, hammerImg, KeyEvent.VK_UP, KeyEvent.VK_DOWN,
+        hammer2 = new Hammer(600, 100, hammerImg, hitImg, KeyEvent.VK_UP, KeyEvent.VK_DOWN,
                 KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT); // 플레이어 2 해머 설정
         pressedKeys = new HashSet<>();
         setTitle("Mole Game - 20203330 YDH"); // 20203330 윤대현의 두더지 게임을 타이틀에
@@ -57,7 +59,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         score_label1.setText("" + molegame_score1); // 텍스트 설정
         score_label2.setText("" + molegame_score2); // 텍스트 설정
 
-        Font score_font = new Font("궁서", Font.BOLD, 30); // 폰트 설정
+        Font score_font = new Font("궁서", Font.BOLD, 20); // 폰트 설정
         score_label1.setFont(score_font); // 폰트 적용
         score_label2.setFont(score_font); // 폰트 적용
 
@@ -106,6 +108,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         hammer2.move(pressedKeys); // hammer2 움직이기
 
         if (keyCode == KeyEvent.VK_SPACE){ // 1P 전용: 스페이스를 눌렀을 경우
+            hammer1.hit();
             for(Mole mole : moles){
                 if((hammer1.getX() <= mole.getX() + 50) && (hammer1.getX() >= mole.getX() - 50) // 1p의 망치가 두더지 이미지의 좌표범위와 일치하는 경우
                         && (hammer1.getY() <= mole.getY() + 50) && (hammer1.getY() <= mole.getY() + 50)){
@@ -117,6 +120,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
             }
         }
         if (keyCode == KeyEvent.VK_ENTER){ // 2P 전용: 엔터를 눌렀을 경우
+            hammer2.hit();
             for(Mole mole : moles){
                 if((hammer2.getX() <= mole.getX() + 50) && (hammer2.getX() >= mole.getX() - 50) // 2p의 망치가 두더지 이미지의 좌표범위와 일치하는 경우
                         && (hammer2.getY() <= mole.getY() + 50) && (hammer2.getY() <= mole.getY() + 50)){
