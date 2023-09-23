@@ -7,7 +7,6 @@ import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
 
-
 class Hammer { // 2인용을 구현하기 위한 hAMMER 클래스
     private int hammerX, hammerY;
     private int up,down,left,right;
