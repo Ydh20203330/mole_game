@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Molegame extends JFrame implements KeyListener { // JFrame, KeyListener 사용
-    private Image backgroundImg; // 배경 이미지
+    private Image backgroundImg, main_backgroundImg; // 게임 배경 이미지, 메인 화면 배경 이미지
     private Image hammerImg, hitImg; // 해머 이미지
     private Image moleImg; // 두더지 이미지
     private HashSet<Integer> pressedKeys; // 눌린 키를 다루기 위한 해시셋
@@ -23,6 +23,8 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         molegame_score1 = 0; molegame_score2 = 0;
         ImageIcon backgroundicon = new ImageIcon("Molegamebackground.png"); // 배경 이미지 imageicon으로 획득
         backgroundImg = backgroundicon.getImage(); // 배경 이미지 저장
+        ImageIcon main_backgroundicon = new ImageIcon("main_background.png"); // 배경 이미지 imageicon으로 획득
+        main_backgroundImg = main_backgroundicon.getImage(); // 배경 이미지 저장
 
         ImageIcon hammericon = new ImageIcon("hammer.png"); // 망치 이미지
         hammerImg = hammericon.getImage();
@@ -59,13 +61,22 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
     }
 
     private void initStartScreen() { // 초기 화면 설정용 함수
-        startPanel = new JPanel(); // 패널 할당
+        startPanel = new JPanel() { // 초기 화면용 JPanel 생성
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (main_backgroundImg != null) { // 배경 적용
+                    g.drawImage(main_backgroundImg, 0, 0, getWidth(), getHeight(), this);
+                }
+            }
+        };
         startPanel.setLayout(null); // 상하좌우 배치하는 Layout 설정
         startPanel.setSize(getWidth(), getHeight());
+        Font buttonFont = new Font("SansSerif", Font.PLAIN, 16); // 버튼 전용 폰트
 
         JLabel titleLabel = new JLabel("두더지 게임"); // 타이틀 JLabel 생성
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 24)); // 타이틀 폰트 설정
-        titleLabel.setBounds(300, 50, 200, 30);
+        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 30)); // 타이틀 폰트 설정
+        titleLabel.setBounds(320, 30, 200, 50);
         //titleLabel.setHorizontalAlignment(JLabel.CENTER); // 글 중앙 정렬
         startPanel.add(titleLabel); // startPanel의 북쪽에 타이틀 Label 위치시킴
 
@@ -73,21 +84,24 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         hardButton = new JButton("상급자용");
         exitButton = new JButton("종료"); // 버튼 세개에 JButton 할당
 
-        easyButton.setBounds(300, 100, 200, 30); // 위치와 크기 설정
-        hardButton.setBounds(300, 150, 200, 30); // 위치와 크기 설정
-        exitButton.setBounds(300, 200, 200, 30); // 위치와 크기 설정
+        easyButton.setBounds(300, 100, 200, 50); 
+        hardButton.setBounds(300, 180, 200, 50); 
+        exitButton.setBounds(300, 260, 200, 50); // 버튼들 위치와 크기 설정
+        easyButton.setFont(buttonFont); 
+        hardButton.setFont(buttonFont);
+        exitButton.setFont(buttonFont); // 버튼들 폰트 설정
 
         startPanel.add(easyButton);
         startPanel.add(hardButton);
-        startPanel.add(exitButton);
+        startPanel.add(exitButton); // 버튼들 패널에 추가
 
         easyButton.addActionListener(new ActionListener() { // 초보자용 버튼 작동
             @Override
             public void actionPerformed(ActionEvent e) {
                 diffcultSet(3000); // 딜레이 설정
                 startPanel.setVisible(false); // 시작화면 안보이게
-                gameStarted = true;
-                gameStart();
+                gameStarted = true; // paint용 변수 설정
+                gameStart(); // 게임 시작
                 requestFocus(); // 키 입력 받을 수 있도록 포커스 요청
             }
         });
@@ -96,8 +110,8 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
             public void actionPerformed(ActionEvent e) {
                 diffcultSet(1500); // 딜레이 설정
                 startPanel.setVisible(false); // 시작화면 안보이게
-                gameStarted = true;
-                gameStart();
+                gameStarted = true; // paint용 변수 설정
+                gameStart(); // 게임 시작
                 requestFocus(); // 키 입력 받을 수 있도록 포커스 요청
             }
         });
@@ -112,7 +126,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         startPanel.setVisible(true); // 시작 화면을 표시
     }
 
-    private void gameStart(){
+    private void gameStart(){ // 게임 시작 관리 함수
         for (Mole mole : moles){ // 각 두더지별로 적용
             mole.timerstart(); // 타이머 ON
         }
@@ -133,7 +147,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
     }
 
     public void paint(Graphics g){ // 배경은 유지, 해머와 두더지만 계속 갱신
-        if(gameStarted){
+        if(gameStarted){ // 게임 시작 여부에 따라 startPanel을 그리거나 게임 화면을 그리거나
             if (backgroundImg != null) {
                 g.drawImage(backgroundImg, 0, 0, getWidth(), getHeight(), this); // 배경 이미지 설정
             }
@@ -154,7 +168,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
             }
         }
         else {
-            startPanel.repaint();
+            startPanel.repaint(); // 시작 패널 그림
         }
     }
 
@@ -210,9 +224,9 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         mole.reset();
     }
 
-    private void diffcultSet(int delay){
+    private void diffcultSet(int delay){ // 두더지가 사라졌다 나타나는 간격 조절용 함수
         for (Mole mole : moles) {
-            mole.delaySet(delay);
+            mole.delaySet(delay); // 각 두더지마다 주기 설정
         }
     }
 
