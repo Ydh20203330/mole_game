@@ -9,8 +9,8 @@ public class Mole extends JFrame{ // 한마리의 두더지가 아닌 여러 마
     public Mole() { // Mole 클래스 생성자, 좌표값과 delay 설정 후 Timer 설정
         x = -100; y = - 100; delay = 3000;
         moleTimer = new Timer(delay, (ActionEvent e) -> { // 타이머 동작, 딜레이마다 위치 재조정
-            x = (int)(Math.random() * (getWidth() - 50)); // 랜덤 x좌표
-            y = (int)(Math.random() * (getHeight() - 50)); // 랜덤 y좌표
+            x = (int)(Math.random() * (800 - 50)); // 랜덤 x좌표
+            y = (int)(Math.random() * (400 - 50)); // 랜덤 y좌표
             repaint(); // 다시 그림
         }); // 두더지가 타이머에 따라 랜덤한 위치로 이동함
     }
