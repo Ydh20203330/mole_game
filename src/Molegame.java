@@ -153,7 +153,9 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
                 score_label2.repaint(); // 점수판 2 repaint
             }
         }
-
+        else {
+            startPanel.repaint();
+        }
     }
 
     @Override
