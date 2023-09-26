@@ -17,6 +17,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
     private JPanel startPanel, gamePanel; // 시작 화면 패널, 게임 패널
     private JButton easyButton, hardButton, exitButton; // 난이도 선택 버튼과 종료 버튼
     private boolean gameStarted = false; // 게임 시작 여부 부울값
+    private boolean gameOver = false; // 게임 종료 여부 부울값
 
 
     public Molegame() { // 생성자
@@ -146,6 +147,21 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
         this.add(score_label2); // 2P 점수판 JLabel JFrame에 추가
     }
 
+    private void checkGameOver() { // 게임 종료 관리 함수
+        if (molegame_score1 >= 15) { // 15점 넘으면 승리
+            gameOver = true;
+            showGameOverMessage("Player 1"); // 플레이어 1 승리 메시지 표시
+        } else if (molegame_score2 >= 15) { // 15점 넘으면 승리
+            gameOver = true;
+            showGameOverMessage("Player 2"); // 플레이어 2 승리 메시지 표시
+        }
+    }
+
+    private void showGameOverMessage(String winner) { // 게임 종료 메시지를 보여주고 종료함
+        JOptionPane.showMessageDialog(this, "YOU WIN! Player " + winner, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        System.exit(0); // 게임 종료
+    }
+
     public void paint(Graphics g){ // 배경은 유지, 해머와 두더지만 계속 갱신
         if(gameStarted){ // 게임 시작 여부에 따라 startPanel을 그리거나 게임 화면을 그리거나
             if (backgroundImg != null) {
@@ -189,6 +205,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
                     System.out.println("1P Score : " + molegame_score1); // 임시 점수출력
                     score_label1.setText("" + molegame_score1); // 1P 점수 설정
                     resetMole(mole); // 두더지 초기화
+                    checkGameOver(); // 15점 달성시 종료 함수 호출
                 }
             }
         }
@@ -201,6 +218,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
                     System.out.println("2P Score : " + molegame_score2); // 임시 점수출력
                     score_label2.setText("" + molegame_score2); // 2P 점수 설정
                     resetMole(mole); // 두더지 초기화
+                    checkGameOver(); // 15점 달성시 종료 함수 호출
                 }
             }
         }
