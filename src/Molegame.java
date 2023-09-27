@@ -4,6 +4,7 @@ import java.awt.event.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.*;
 
 public class Molegame extends JFrame implements KeyListener { // JFrame, KeyListener 사용
     private Image backgroundImg, main_backgroundImg; // 게임 배경 이미지, 메인 화면 배경 이미지
@@ -11,6 +12,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
     private Image moleImg; // 두더지 이미지
     private HashSet<Integer> pressedKeys; // 눌린 키를 다루기 위한 해시셋
     private int molegame_score1, molegame_score2; // 점수 1P, 2P
+    private int molegame_miss1, molegame_miss2; // 최종 결과제에서 사용할 미스율
     private JLabel score_label1, score_label2; // 점수 표시할 칸 1,2
     private List<Mole> moles; // 두더지 클래스 리스트
     private Hammer hammer1, hammer2; // 플레이어 1, 2
@@ -18,10 +20,15 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
     private JButton easyButton, hardButton, exitButton; // 난이도 선택 버튼과 종료 버튼
     private boolean gameStarted = false; // 게임 시작 여부 부울값
     private boolean gameOver = false; // 게임 종료 여부 부울값
+    private boolean missCheck1 = true, missCheck2 = true; // 플레이어별 미스 여부 체크 부울값
+    private String filePath = "game_results.txt"; // 파일 경로
+    private BufferedWriter writer; // 파일 쓰기 객체
 
 
     public Molegame() { // 생성자
-        molegame_score1 = 0; molegame_score2 = 0;
+        molegame_score1 = 0; molegame_score2 = 0; // 초기 점수 설정
+        molegame_miss1 = 0; molegame_miss2 = 0; // 초기 빗나감 횟수 설정
+        
         ImageIcon backgroundicon = new ImageIcon("Molegamebackground.png"); // 배경 이미지 imageicon으로 획득
         backgroundImg = backgroundicon.getImage(); // 배경 이미지 저장
         ImageIcon main_backgroundicon = new ImageIcon("main_background.png"); // 배경 이미지 imageicon으로 획득
@@ -47,6 +54,11 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
             moles.add(new Mole()); // 두더지 세마리 추가
         } // 두더지 인스턴스 배열에 추가
 
+        try {
+            writer = new BufferedWriter(new FileWriter(filePath)); // 파일 쓰기 객체 초기화
+        } catch (IOException e){
+            e.printStackTrace();
+        }
 
         setResizable(false); // 창 크기 변경 불가
         setLocationRelativeTo(null); // 창 중앙에 위치
@@ -150,16 +162,35 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
     private void checkGameOver() { // 게임 종료 관리 함수
         if (molegame_score1 >= 15) { // 15점 넘으면 승리
             gameOver = true;
-            showGameOverMessage("Player 1"); // 플레이어 1 승리 메시지 표시
+            showGameOverMessage("Player 1", "Player 2", molegame_score1,
+                    molegame_score2, molegame_miss1, molegame_miss2); // 플레이어 1 승리 메시지 표시
         } else if (molegame_score2 >= 15) { // 15점 넘으면 승리
             gameOver = true;
-            showGameOverMessage("Player 2"); // 플레이어 2 승리 메시지 표시
+            showGameOverMessage("Player 2", "Player 1", molegame_score2,
+                    molegame_score1, molegame_miss2, molegame_miss1); // 플레이어 2 승리 메시지 표시
         }
     }
 
-    private void showGameOverMessage(String winner) { // 게임 종료 메시지를 보여주고 종료함
+    private void showGameOverMessage(String winner, String loser, int winnerScore,
+                                     int loserScore, int winnerMiss, int loserMiss) {
+        writeResultsFile(winner, winnerScore, winnerMiss, true);
+        writeResultsFile(loser, loserScore, loserMiss, false); // 승자, 패자 모두 기록
+
+
         JOptionPane.showMessageDialog(this, "YOU WIN! Player " + winner, "Game Over", JOptionPane.INFORMATION_MESSAGE);
+        // 게임 종료 메시지를 보여주고 종료함
         System.exit(0); // 게임 종료
+    }
+
+    private void writeResultsFile(String player, int score, int miss, boolean isWinner) {
+        try {
+            writer.write(player + " Score = " + score + " Miss = " + miss + (isWinner ? " Winner" : " Loser"));
+            // 파일에 1P, 2P 정보, 스코어, 못 맞춘 횟수, 승자 여부 기록
+            writer.newLine(); // 다음 줄로
+            writer.flush(); // 버퍼 비우기
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void paint(Graphics g){ // 배경은 유지, 해머와 두더지만 계속 갱신
@@ -198,6 +229,7 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
 
         if (keyCode == KeyEvent.VK_SPACE){ // 1P 전용: 스페이스를 눌렀을 경우
             hammer1.hit();
+            missCheck1 = true; // 미스를 확인해야 하는지 여부를 true로
             for(Mole mole : moles){
                 if((hammer1.getX() <= mole.getX() + 50) && (hammer1.getX() >= mole.getX() - 50) // 1p의 망치가 두더지 이미지의 좌표범위와 일치하는 경우
                         && (hammer1.getY() <= mole.getY() + 50) && (hammer1.getY() <= mole.getY() + 50)){
@@ -206,11 +238,17 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
                     score_label1.setText("" + molegame_score1); // 1P 점수 설정
                     resetMole(mole); // 두더지 초기화
                     checkGameOver(); // 15점 달성시 종료 함수 호출
+                } else {
+                    if (missCheck1){
+                        molegame_miss1 ++; // 1P 빗나감 횟수 증가
+                        missCheck1 = false; // 미스를 확인해야 하는지 여부를 false로
+                    }
                 }
             }
         }
         if (keyCode == KeyEvent.VK_ENTER){ // 2P 전용: 엔터를 눌렀을 경우
             hammer2.hit();
+            missCheck2 = true; // 미스를 확인해야 하는지 여부를 truㅁe로
             for(Mole mole : moles){
                 if((hammer2.getX() <= mole.getX() + 50) && (hammer2.getX() >= mole.getX() - 50) // 2p의 망치가 두더지 이미지의 좌표범위와 일치하는 경우
                         && (hammer2.getY() <= mole.getY() + 50) && (hammer2.getY() <= mole.getY() + 50)){
@@ -219,6 +257,11 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
                     score_label2.setText("" + molegame_score2); // 2P 점수 설정
                     resetMole(mole); // 두더지 초기화
                     checkGameOver(); // 15점 달성시 종료 함수 호출
+                } else {
+                    if (missCheck2){
+                        molegame_miss2 ++; // 2P 빗나감 횟수 증가
+                        missCheck2 = false; // 미스를 확인해야 하는지 여부를 false로
+                    }
                 }
             }
         }
@@ -257,4 +300,19 @@ public class Molegame extends JFrame implements KeyListener { // JFrame, KeyList
             }
         });
     }
+
+    @Override
+    public void dispose() { // JFrame 상속 메서드로, 프레임이 파괴되고 자원이 정리될 때 호출됨
+        // 즉, 프레임이 닫힐 때 writer를 닫아주는 작업을 이곳에서 수행하기 위해 override함
+        super.dispose(); // 부모 객체의 dispose() 호출
+        try {
+            if (writer != null) {
+                writer.close(); // 파일 닫기
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
+
